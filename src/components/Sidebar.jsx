@@ -1,12 +1,12 @@
 import { Link, useLocation } from "react-router-dom";
-import { LayoutDashboard, Navigation, BellRing, Server, Shield } from "lucide-react";
+import { LayoutDashboard, Map as MapIcon, BellRing, Server, Leaf } from "lucide-react";
 
 export default function Sidebar() {
   const location = useLocation();
 
   const links = [
     { name: "Dashboard", path: "/dashboard", icon: LayoutDashboard },
-    { name: "AuraPath", path: "/aurapath", icon: Navigation },
+    { name: "AuraPath", path: "/map", icon: MapIcon },
     { name: "Alerts", path: "/alerts", icon: BellRing },
     { name: "System", path: "/system", icon: Server },
   ];
@@ -14,7 +14,7 @@ export default function Sidebar() {
   return (
     <aside className="w-64 h-screen bg-slate-100 dark:bg-slate-900 border-r border-gray-200 dark:border-white/10 p-6 flex flex-col transition-colors duration-300">
       <div className="flex items-center gap-3 mb-10 text-neon-green">
-        <Shield className="w-8 h-8" />
+        <Leaf className="w-8 h-8" />
         <h1 className="text-2xl font-bold tracking-wider relative top-0.5">
           EcoByte
         </h1>

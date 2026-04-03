@@ -96,20 +96,50 @@ export async function fetchRoutes(start, end) {
     }
 }
 
-export const fetchGeocode = async (query, focusLat = null, focusLon = null) => {
+export const fetchGeocode = async (query, preferBbox = null) => {
     try {
-        let url = `https://api.openrouteservice.org/geocode/search?api_key=${ORS_TOKEN}&text=${query}`;
-        if (focusLat && focusLon) {
-            url += `&focus.point.lat=${focusLat}&focus.point.lon=${focusLon}`;
+        let url = `https://photon.komoot.io/api/?q=${encodeURIComponent(query)}&limit=10`;
+        
+        // Use location bias to boost local results without restricting global ones
+        if (preferBbox) {
+           const centerLon = (preferBbox[0] + preferBbox[2]) / 2;
+           const centerLat = (preferBbox[1] + preferBbox[3]) / 2;
+           url += `&lon=${centerLon}&lat=${centerLat}`;
         }
+        
         const response = await fetch(url);
         const data = await response.json();
-        if (data.features && data.features.length > 0) {
-            return data.features[0].geometry.coordinates; // [lon, lat]
+        
+        if (data && data.features && data.features.length > 0) {
+            return data.features.map(feat => {
+                const p = feat.properties;
+                const nameParts = [p.name, p.street, p.district, p.city, p.state].filter(Boolean);
+                // De-duplicate array
+                const uniqueParts = [...new Set(nameParts)];
+                
+                return {
+                    name: uniqueParts.join(", "),
+                    lon: feat.geometry.coordinates[0],
+                    lat: feat.geometry.coordinates[1],
+                    bbox: p.extent ? [p.extent[0], p.extent[1], p.extent[2], p.extent[3]] : null
+                };
+            }).filter(item => item.name);
         }
-        return null;
+        return [];
     } catch (error) {
         console.error("Failed to geocode", error);
+        return [];
+    }
+};
+
+export const fetchWeatherData = async (lat, lon) => {
+    try {
+        const url = `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current=temperature_2m,relative_humidity_2m,apparent_temperature,weather_code,surface_pressure,wind_speed_10m,wind_direction_10m&hourly=temperature_2m,weather_code,visibility&daily=weather_code,temperature_2m_max,temperature_2m_min,sunrise,sunset,uv_index_max&timezone=auto`;
+        const response = await fetch(url);
+        const data = await response.json();
+        return data;
+    } catch (error) {
+        console.error("Failed to fetch weather data", error);
         return null;
     }
 };

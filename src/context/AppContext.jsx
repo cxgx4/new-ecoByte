@@ -1,11 +1,33 @@
 import React, { createContext, useContext, useState, useEffect } from "react";
+import { generateCityAQIGrid } from "../utils/aqiGrid";
 
 const AppContext = createContext();
 
 export const AppProvider = ({ children }) => {
     const [theme, setTheme] = useState("dark");
-    const [location, setLocation] = useState({ longitude: 88.3639, latitude: 22.5726 });
-    const [user, setUser] = useState("Suhena Samanta");
+    const [user, setUser] = useState("Supriyo Bhattacharyya");
+
+    const defaultBbox = [88.20, 22.40, 88.55, 22.75];
+    const defaultCenter = [88.3639, 22.5726];
+    
+    const [cityState, setCityState] = useState({
+        name: "Kolkata",
+        center: defaultCenter,
+        bbox: defaultBbox,
+        grid: generateCityAQIGrid(defaultBbox, defaultCenter),
+        lastUpdated: new Date().toISOString()
+    });
+
+    const updateCity = (name, center, bbox) => {
+        const usedBbox = bbox || [center[0]-0.2, center[1]-0.2, center[0]+0.2, center[1]+0.2];
+        setCityState({
+            name,
+            center,
+            bbox: usedBbox,
+            grid: generateCityAQIGrid(usedBbox, center),
+            lastUpdated: new Date().toISOString()
+        });
+    };
 
     useEffect(() => {
         if (theme === "dark") {
@@ -20,11 +42,10 @@ export const AppProvider = ({ children }) => {
     };
 
     return (
-        <AppContext.Provider value={{ theme, toggleTheme, location, setLocation, user, setUser }}>
+        <AppContext.Provider value={{ theme, toggleTheme, cityState, updateCity, user, setUser }}>
             {children}
         </AppContext.Provider>
     );
 };
 
-// eslint-disable-next-line react-refresh/only-export-components
 export const useAppContext = () => useContext(AppContext);

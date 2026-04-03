@@ -1,5 +1,4 @@
 import React, { useState } from "react";
-// eslint-disable-next-line no-unused-vars
 import { motion } from "framer-motion";
 import { BellRing, ShieldAlert, SlidersHorizontal, Settings2, Smartphone } from "lucide-react";
 
@@ -53,9 +52,9 @@ export default function AlertSettings() {
                         className={`w-14 h-8 rounded-full transition-colors relative flex items-center p-1 ${smsEnabled ? 'bg-neon-green' : 'bg-gray-300 dark:bg-slate-700'}`}
                     >
                         <motion.div
-                            layout
                             className="w-6 h-6 bg-white rounded-full shadow-sm"
                             animate={{ x: smsEnabled ? 24 : 0 }}
+                            transition={{ type: "spring", stiffness: 500, damping: 30 }}
                         />
                     </button>
                 </div>
