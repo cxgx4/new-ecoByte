@@ -1,15 +1,29 @@
 import React, { useState } from "react";
-import { motion } from "framer-motion";
-import { Leaf, ArrowRight, Loader2 } from "lucide-react";
+import { motion, AnimatePresence } from "framer-motion";
+import { Leaf, ArrowRight, Loader2, User, Server, X } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useAppContext } from "../context/AppContext";
 
 export default function Landing() {
   const navigate = useNavigate();
-  const { updateCity } = useAppContext();
+  const { updateCity, setAuthRole, setUser } = useAppContext();
   const [isDetecting, setIsDetecting] = useState(false);
+  const [showLogin, setShowLogin] = useState(false);
+  const [authMode, setAuthMode] = useState('login');
+  const [localAuthRole, setLocalAuthRole] = useState('user');
+  const [username, setUsername] = useState('');
+  const [password, setPassword] = useState('');
 
-  const handleGetStarted = () => {
+  const handleGetStartedClick = () => {
+    setShowLogin(true);
+  };
+
+  const executeLoginAndEnter = (e) => {
+    e.preventDefault();
+    setAuthRole(localAuthRole);
+    // Remember the user or fallback to the dummy user
+    setUser(username.trim() ? username : "Supriyo Bhattacharyya");
+    setShowLogin(false);
     setIsDetecting(true);
     if ("geolocation" in navigator) {
       navigator.geolocation.getCurrentPosition(
@@ -101,7 +115,7 @@ export default function Landing() {
         </motion.p>
 
         <motion.button
-           onClick={handleGetStarted}
+           onClick={handleGetStartedClick}
            disabled={isDetecting}
            whileHover={{ scale: 1.05 }}
            whileTap={{ scale: 0.95 }}
@@ -133,6 +147,85 @@ export default function Landing() {
             <span>Clean Routes</span>
         </motion.div>
       </div>
+
+      <AnimatePresence>
+        {showLogin && (
+          <motion.div 
+            initial={{ opacity: 0 }} 
+            animate={{ opacity: 1 }} 
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-md px-4"
+          >
+            <motion.div 
+              initial={{ scale: 0.95, opacity: 0, y: 20 }}
+              animate={{ scale: 1, opacity: 1, y: 0 }}
+              exit={{ scale: 0.95, opacity: 0, y: 20 }}
+              className="bg-[#0B1120] border border-white/10 rounded-3xl p-8 max-w-md w-full shadow-2xl relative"
+            >
+              <button onClick={() => setShowLogin(false)} className="absolute top-5 right-5 text-gray-500 hover:text-white transition-colors">
+                <X className="w-5 h-5" />
+              </button>
+              
+              <div className="flex flex-col items-center gap-4 mb-6 pt-2">
+                 <div className="w-14 h-14 bg-neon-green/10 rounded-2xl flex items-center justify-center">
+                    <User className="w-7 h-7 text-neon-green" />
+                 </div>
+                 <h2 className="text-2xl font-black text-white tracking-wide">{authMode === 'login' ? 'Welcome Back' : 'Create Account'}</h2>
+                 <p className="text-sm text-gray-400 text-center">Enter your details to access the EcoByte platform.</p>
+              </div>
+
+              <div className="flex bg-gray-800/50 p-1 rounded-xl mb-6">
+                 <button onClick={() => setAuthMode('login')} className={`flex-1 py-2 text-sm font-bold rounded-lg transition-all ${authMode === 'login' ? 'bg-[#0B1120] text-neon-green shadow border border-white/5' : 'text-gray-400 hover:text-white'}`}>Login</button>
+                 <button onClick={() => setAuthMode('signup')} className={`flex-1 py-2 text-sm font-bold rounded-lg transition-all ${authMode === 'signup' ? 'bg-[#0B1120] text-neon-green shadow border border-white/5' : 'text-gray-400 hover:text-white'}`}>Sign Up</button>
+              </div>
+
+              <form onSubmit={executeLoginAndEnter} className="flex flex-col gap-4">
+                 <div>
+                    <label className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-2 block">Access Role</label>
+                    <div className="flex gap-2">
+                       <button type="button" onClick={() => setLocalAuthRole('user')} className={`flex-1 py-3 px-2 rounded-xl flex flex-col items-center gap-1 border transition-all ${localAuthRole === 'user' ? 'border-neon-green bg-neon-green/10' : 'border-gray-700 hover:border-gray-500'}`}>
+                          <Leaf className={`w-5 h-5 ${localAuthRole === 'user' ? 'text-neon-green' : 'text-gray-400'}`} />
+                          <span className={`text-xs font-bold ${localAuthRole === 'user' ? 'text-neon-green' : 'text-gray-400'}`}>Resident</span>
+                       </button>
+                       <button type="button" onClick={() => setLocalAuthRole('admin')} className={`flex-1 py-3 px-2 rounded-xl flex flex-col items-center gap-1 border transition-all ${localAuthRole === 'admin' ? 'border-blue-400 bg-blue-500/10' : 'border-gray-700 hover:border-gray-500'}`}>
+                          <Server className={`w-5 h-5 ${localAuthRole === 'admin' ? 'text-blue-400' : 'text-gray-400'}`} />
+                          <span className={`text-xs font-bold ${localAuthRole === 'admin' ? 'text-blue-400' : 'text-gray-400'}`}>Admin</span>
+                       </button>
+                    </div>
+                 </div>
+
+                 <div>
+                    <label className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-2 block">User ID</label>
+                    <input 
+                      type="text" 
+                      required
+                      placeholder="Username / Identifier"
+                      value={username}
+                      onChange={(e) => setUsername(e.target.value)}
+                      className="w-full bg-[#111827] border border-gray-700 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-neon-green transition-colors"
+                    />
+                 </div>
+
+                 <div>
+                    <label className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-2 block">Password</label>
+                    <input 
+                      type="password" 
+                      required
+                      placeholder="••••••••"
+                      value={password}
+                      onChange={(e) => setPassword(e.target.value)}
+                      className="w-full bg-[#111827] border border-gray-700 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-neon-green transition-colors"
+                    />
+                 </div>
+
+                 <button type="submit" className="w-full bg-neon-green hover:bg-[#32e011] text-[#0B1120] font-bold py-3.5 rounded-xl uppercase tracking-wider mt-2 transition-colors inline-block text-center cursor-pointer">
+                    {authMode === 'login' ? 'Login Securely' : 'Create Account'}
+                 </button>
+              </form>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 }

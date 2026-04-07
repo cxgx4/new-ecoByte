@@ -1,13 +1,10 @@
 import React, { useState } from "react";
 import { motion } from "framer-motion";
 import { BellRing, ShieldAlert, SlidersHorizontal, Settings2, Smartphone } from "lucide-react";
+import { useAppContext } from "../context/AppContext";
 
 export default function AlertSettings() {
-    const [thresholds, setThresholds] = useState({
-        pm25: 150,
-        co2: 1000,
-        noise: 85
-    });
+    const { thresholds, setThresholds } = useAppContext();
     const [smsEnabled, setSmsEnabled] = useState(true);
 
     const handleSliderChange = (e) => {

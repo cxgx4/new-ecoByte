@@ -1,15 +1,20 @@
 import { Link, useLocation } from "react-router-dom";
 import { LayoutDashboard, Map as MapIcon, BellRing, Server, Leaf } from "lucide-react";
+import { useAppContext } from "../context/AppContext";
 
 export default function Sidebar() {
   const location = useLocation();
+  const { authRole } = useAppContext();
 
   const links = [
     { name: "Dashboard", path: "/dashboard", icon: LayoutDashboard },
     { name: "AuraPath", path: "/map", icon: MapIcon },
     { name: "Alerts", path: "/alerts", icon: BellRing },
-    { name: "System", path: "/system", icon: Server },
   ];
+
+  if (authRole === "admin") {
+    links.push({ name: "System", path: "/system", icon: Server });
+  }
 
   return (
     <aside className="w-64 h-screen bg-slate-100 dark:bg-slate-900 border-r border-gray-200 dark:border-white/10 p-6 flex flex-col transition-colors duration-300">

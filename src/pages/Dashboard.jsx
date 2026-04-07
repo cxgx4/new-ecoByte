@@ -3,7 +3,6 @@ import { Wind, MapPin, Loader2, Thermometer, Droplets, Sun, Sunrise, Sunset, Eye
 import { motion } from "framer-motion";
 import { Link } from "react-router-dom";
 import { useAppContext } from "../context/AppContext";
-import { fetchWeatherData } from "../utils/api";
 import { getWeatherIcon, getWeatherDescription } from "../components/WeatherIcons";
 
 const containerVariants = {
@@ -17,20 +16,15 @@ const itemVariants = {
 };
 
 export default function Dashboard() {
-  const { cityState } = useAppContext();
-  const [weather, setWeather] = useState(null);
+  const { cityState, weatherState } = useAppContext();
+  const [weather, setWeather] = useState(weatherState);
 
+  // Sync with global weather state
   useEffect(() => {
-    let active = true;
-    const fetchWeather = async () => {
-      if (!cityState?.center) return;
-      // Fetch data based on the city's precise center
-      const res = await fetchWeatherData(cityState.center[1], cityState.center[0]);
-      if (active && res) setWeather(res);
-    };
-    fetchWeather();
-    return () => { active = false; };
-  }, [cityState]);
+     if (weatherState) {
+         setWeather(weatherState);
+     }
+  }, [weatherState]);
 
   const stats = useMemo(() => {
     if (!cityState || !cityState.grid || !cityState.grid.features) return null;

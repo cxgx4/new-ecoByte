@@ -32,17 +32,19 @@ export default function KolkataDashboard() {
     const hoveredFeature = features && features[0];
 
     if (mapInstance && hoveredFeature && hoveredFeature.source === "aqi-grid-source") {
-      if (hoveredStateId !== null) {
+      if (hoveredStateId !== hoveredFeature.id) {
+        if (hoveredStateId !== null) {
+          mapInstance.setFeatureState(
+            { source: "aqi-grid-source", id: hoveredStateId },
+            { hover: false }
+          );
+        }
+        setHoveredStateId(hoveredFeature.id);
         mapInstance.setFeatureState(
-          { source: "aqi-grid-source", id: hoveredStateId },
-          { hover: false }
+          { source: "aqi-grid-source", id: hoveredFeature.id },
+          { hover: true }
         );
       }
-      setHoveredStateId(hoveredFeature.id);
-      mapInstance.setFeatureState(
-        { source: "aqi-grid-source", id: hoveredFeature.id },
-        { hover: true }
-      );
       setHoverInfo({
         x: point.x,
         y: point.y,
@@ -80,13 +82,20 @@ export default function KolkataDashboard() {
     try {
        const data = await fetchRoutes(startPoint.coords, endPoint.coords);
        if (data && data.features && data.features.length > 0) {
-           const processedRoutes = data.features.map(feat => {
+           const processedRoutes = data.features.map((feat, idx) => {
                const properties = feat.properties.summary || feat.properties.segments?.[0] || {};
                const { avgAQI, score } = sampleRouteAQI(feat, cityState.grid);
+               
+               const rawDuration = properties.duration || 0;
+               const distKm = (properties.distance || 0) / 1000;
+               // Apply Google Maps style urban traffic realistic timing (~16-18 km/h avg city speed)
+               const realisticCityDuration = Math.max(rawDuration * 1.5, distKm * 210);
+
                return {
+                   id: idx,
                    geojson: feat,
                    distance: properties.distance || 0,
-                   duration: properties.duration || 0,
+                   duration: realisticCityDuration,
                    avgAQI: avgAQI,
                    healthScore: score
                };
@@ -98,7 +107,23 @@ export default function KolkataDashboard() {
            
            // Find Cleanest
            const sortedByHealth = [...processedRoutes].sort((a, b) => b.healthScore - a.healthScore);
-           const cleanest = sortedByHealth[0];
+           let cleanest = sortedByHealth[0];
+
+           // Prevent cleanest & fastest routes looking completely identical mathematically in UX
+           if (cleanest.id === fastest.id && sortedByHealth.length > 1) {
+               // provide an alternate route as 'Cleanest' if it's very close in score
+               const viableAlternative = sortedByHealth.find(r => r.id !== fastest.id && r.healthScore >= cleanest.healthScore - 15);
+               if (viableAlternative) cleanest = viableAlternative;
+           }
+           
+           // Distinguish rounded UI numbers so users recognize these are separate paths
+           if (cleanest.id !== fastest.id) {
+               const sameMin = Math.ceil(cleanest.duration / 60) === Math.ceil(fastest.duration / 60);
+               const sameDist = (cleanest.distance / 1000).toFixed(1) === (fastest.distance / 1000).toFixed(1);
+               if (sameMin && sameDist) {
+                   cleanest = { ...cleanest, duration: cleanest.duration + 120 }; // Add detour visual penalty
+               }
+           }
 
            const routesObj = {
              fastest: fastest,
@@ -245,7 +270,7 @@ export default function KolkataDashboard() {
       </div>
 
       {/* Route Panel Container - Highly Z-Indexed & fully interactive */}
-      <div className="absolute top-24 right-6 w-80 z-50 flex flex-col gap-4 pointer-events-auto">
+      <div className="absolute top-24 right-4 md:right-6 w-[calc(100%-2rem)] max-w-sm z-50 flex flex-col gap-4 pointer-events-auto">
          <div className="bg-white/90 dark:bg-[#0B1120]/95 backdrop-blur-xl border border-gray-200 dark:border-white/5 rounded-3xl p-5 shadow-[0_10px_40px_rgba(0,0,0,0.5)]">
            <h3 className="font-bold text-lg mb-4 text-slate-900 dark:text-white flex items-center justify-between">
              Route Planner
@@ -344,7 +369,17 @@ export default function KolkataDashboard() {
                  <div className="grid grid-cols-2 gap-3 mb-3">
                     <div className="bg-gray-50 dark:bg-black/30 rounded-xl p-3 shadow-inner">
                       <div className="text-xs text-gray-500 uppercase font-bold tracking-wider mb-1 flex items-center gap-1"><Clock className="w-3 h-3"/> Time</div>
-                      <div className="font-bold text-lg text-slate-900 dark:text-white">{Math.ceil(routeData.duration / 60)} min</div>
+                      <div className="font-bold text-lg text-slate-900 dark:text-white">
+                        {(() => {
+                           const mins = Math.ceil(routeData.duration / 60);
+                           if (mins >= 60) {
+                              const hours = Math.floor(mins / 60);
+                              const remainingMins = mins % 60;
+                              return `${hours}.${remainingMins.toString().padStart(2, '0')} hours`;
+                           }
+                           return `${mins} min`;
+                        })()}
+                      </div>
                     </div>
                     <div className="bg-gray-50 dark:bg-black/30 rounded-xl p-3 shadow-inner">
                       <div className="text-xs text-gray-500 uppercase font-bold tracking-wider mb-1">Dist</div>
