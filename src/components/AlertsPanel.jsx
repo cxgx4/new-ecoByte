@@ -38,7 +38,7 @@ export default function AlertsPanel({ onClose }) {
         return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
     };
 
-    // Sort active alerts by severity, then by time (newest first). Since mock data is already somewhat sorted, we just sort by time for simplicity or by a rank.
+    // Sort active alerts by severity, then by time (newest first).
     const severityRank = { Critical: 3, Warning: 2, Advisory: 1 };
     const sortedActive = [...activeAlerts].sort((a, b) => {
         if (severityRank[b.type] !== severityRank[a.type]) {

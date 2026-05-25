@@ -51,6 +51,7 @@ export const AppProvider = ({ children }) => {
     }, [cityState.center]);
 
     useEffect(() => {
+        document.documentElement.setAttribute('data-theme', theme);
         if (theme === "dark") {
             document.documentElement.classList.add("dark");
         } else {
@@ -123,7 +124,7 @@ export const AppProvider = ({ children }) => {
             }
         ];
 
-        // Every 15 seconds, maybe generate an alert (50% chance to make it feel natural)
+        // Every 15 seconds, maybe generate an alert
         const intervalId = setInterval(() => {
             if (Math.random() > 0.5) {
                 const randomEvent = mockEvents[Math.floor(Math.random() * mockEvents.length)];
@@ -134,7 +135,6 @@ export const AppProvider = ({ children }) => {
                 };
                 
                 setActiveAlerts(prev => {
-                    // Prevent duplicate exact active alerts to keep demo clean
                     if (prev.some(a => a.title === newAlert.title)) {
                         return prev;
                     }

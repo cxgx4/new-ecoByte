@@ -3,18 +3,21 @@ import { Sun, Moon, Bell, User, LogOut } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useNavigate } from "react-router-dom";
 import { useAppContext } from "../context/AppContext";
+import { useAuth } from "../context/AuthContext";
 import SearchBar from "./search/SearchBar";
 import AlertsPanel from "./AlertsPanel";
 
 export default function TopNavigation() {
-    const { theme, toggleTheme, user, updateCity, activeAlerts } = useAppContext();
+    const { theme, toggleTheme, updateCity, activeAlerts } = useAppContext();
+    const { user, profileName, signOut } = useAuth();
     const [isAlertsOpen, setIsAlertsOpen] = useState(false);
     const [isProfileOpen, setIsProfileOpen] = useState(false);
     const navigate = useNavigate();
 
-    const handleLogout = () => {
+    const handleLogout = async () => {
         setIsProfileOpen(false);
         if (window.confirm("Are you sure you want to log out of EcoByte?")) {
+            await signOut();
             navigate("/");
         }
     };
@@ -27,7 +30,7 @@ export default function TopNavigation() {
     };
 
     return (
-        <header className="h-16 flex items-center justify-between px-6 bg-white/70 dark:bg-[#0B1120]/90 backdrop-blur-md border-b border-gray-200 dark:border-white/10 z-10 transition-colors duration-300">
+        <header className="h-16 flex items-center justify-between px-6 bg-[var(--bg-surface)] border-b border-[var(--border)] z-10 transition-colors duration-300">
             <div className="flex items-center gap-4 flex-1">
                 <div className="relative w-full max-w-md hidden md:block">
                      <SearchBar 
@@ -40,17 +43,25 @@ export default function TopNavigation() {
             </div>
 
             <div className="flex items-center gap-4">
-                <motion.button
-                    whileHover={{ scale: 1.05 }}
-                    whileTap={{ scale: 0.95 }}
+                <button
                     onClick={toggleTheme}
-                    className="p-2 rounded-full hover:bg-gray-200 dark:hover:bg-white/10 transition-colors"
+                    style={{
+                        background: 'var(--bg-elevated)',
+                        border: '1px solid var(--border)',
+                        borderRadius: '999px',
+                        padding: '6px 12px',
+                        color: 'var(--text-primary)',
+                        cursor: 'pointer',
+                        fontSize: '16px',
+                        transition: 'all 0.2s ease',
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '6px'
+                    }}
                     aria-label="Toggle theme"
                 >
-                    <motion.div animate={{ rotate: theme === "dark" ? 0 : 180 }} transition={{ duration: 0.4, type: "spring" }}>
-                       {theme === "dark" ? <Sun className="w-5 h-5 text-yellow-400" /> : <Moon className="w-5 h-5 text-slate-700" />}
-                    </motion.div>
-                </motion.button>
+                    {theme === 'dark' ? '☀️' : '🌙'}
+                </button>
 
                 <div className="relative">
                     <motion.button 
@@ -77,7 +88,9 @@ export default function TopNavigation() {
                         <div className="w-8 h-8 rounded-full bg-neon-green/20 flex items-center justify-center text-neon-green border border-neon-green/50 pointer-events-none">
                             <User className="w-4 h-4" />
                         </div>
-                        <span className="text-sm font-medium hidden sm:block dark:text-gray-200 pointer-events-none">{user}</span>
+                        <span className="text-sm font-medium hidden sm:block dark:text-gray-200 pointer-events-none">
+                            {profileName || user?.email?.split('@')[0] || 'User'}
+                        </span>
                     </button>
 
                     <AnimatePresence>
@@ -91,7 +104,7 @@ export default function TopNavigation() {
                            >
                               <div className="px-4 py-3 border-b border-gray-100 dark:border-gray-800">
                                  <p className="text-xs text-gray-500 uppercase tracking-wider font-bold mb-1">Signed in as</p>
-                                 <p className="text-sm font-bold truncate dark:text-gray-200">{user}</p>
+                                 <p className="text-sm font-bold truncate dark:text-gray-200">{profileName || user?.email || 'User'}</p>
                               </div>
                               <button 
                                  onClick={handleLogout}

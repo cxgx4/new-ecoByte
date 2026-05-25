@@ -1,0 +1,439 @@
+
+================================================================
+              ECOBYTE — COMPLETE CODE OVERVIEW
+              For Teacher Presentation / Explanation
+================================================================
+
+WHAT IS ECOBYTE?
+-----------------
+EcoByte is a real-time air quality monitoring web application.
+It shows pollution levels (AQI), weather data, and provides
+"AuraPath" — a clean-air route planner — for smarter navigation.
+The default city is Kolkata, but any city can be searched globally.
+
+================================================================
+                        TECH STACK
+================================================================
+
+Tool/Library          | What it does
+----------------------|------------------------------------------
+React 19              | Builds the entire user interface (UI)
+Vite                  | Runs dev server, builds the final app
+React Router DOM      | Handles page navigation (URL routing)
+Tailwind CSS          | Pre-built CSS styling classes
+Framer Motion         | Smooth animations and transitions
+MapLibre GL           | Renders the interactive map
+react-map-gl          | React wrapper for MapLibre GL
+Recharts              | Draws charts and graphs
+@turf/turf            | GIS library for hexagonal grid math
+Lucide React          | Icon library (leaf, bell, map icons etc.)
+
+================================================================
+                   FOLDER & FILE STRUCTURE
+================================================================
+
+ECOBYTE/
+|
+|-- index.html                  <- Entry point HTML file
+|-- package.json                <- Dependencies and scripts
+|-- vite.config.js              <- Vite bundler configuration
+|-- tailwind.config.js          <- Tailwind CSS configuration
+|-- .env                        <- Secret API keys (MapTiler)
+|-- vercel.json                 <- Vercel deployment config
+|-- speech.txt                  <- Presentation speech script
+|-- presentation.md             <- Presentation notes/slides
+|
+|-- src/                        <- ALL SOURCE CODE IS HERE
+|   |
+|   |-- main.jsx                <- App startup / boot file
+|   |-- App.jsx                 <- URL router / page map
+|   |-- index.css               <- Global CSS styles
+|   |-- App.css                 <- App-level CSS
+|   |
+|   |-- context/
+|   |   |-- AppContext.jsx      <- Global state manager (brain)
+|   |
+|   |-- utils/
+|   |   |-- api.js              <- All external API calls
+|   |   |-- aqiGrid.js          <- Hexagonal AQI grid logic
+|   |   |-- mockData.js         <- Fake data for charts/nodes
+|   |
+|   |-- components/
+|   |   |-- Layout.jsx          <- Page frame (sidebar+topbar)
+|   |   |-- Sidebar.jsx         <- Left navigation menu
+|   |   |-- TopNavigation.jsx   <- Top header bar
+|   |   |-- AlertsPanel.jsx     <- Slide-down alerts popup
+|   |   |-- WeatherIcons.jsx    <- Weather icon helper
+|   |   |-- AnimatedCounter.jsx <- Number count-up animation
+|   |   |-- LoadingSpinner.jsx  <- Loading spinner component
+|   |   |-- AQICard.jsx         <- Small AQI display card
+|   |   |
+|   |   |-- map/
+|   |   |   |-- KolkataMap.jsx  <- Interactive map component
+|   |   |
+|   |   |-- aqi/
+|   |   |   |-- AQIOverlay.jsx  <- Hex AQI layer on the map
+|   |   |
+|   |   |-- search/
+|   |       |-- SearchBar.jsx   <- Location search + autocomplete
+|   |
+|   |-- pages/
+|       |-- Landing.jsx         <- Login / welcome screen
+|       |-- Dashboard.jsx       <- Main AQI statistics page
+|       |-- KolkataDashboard.jsx<- AuraPath (map + route planner)
+|       |-- AlertSettings.jsx   <- Configure alert thresholds
+|       |-- SystemStatus.jsx    <- Admin: IoT sensor status
+|       |-- Alerts.jsx          <- (unused placeholder)
+|       |-- System.jsx          <- (unused placeholder)
+
+================================================================
+                   FILE-BY-FILE EXPLANATION
+================================================================
+
+---[ ROOT FILES ]---
+
+index.html
+  - The very first file the browser loads.
+  - Has a single <div id="root"> where React injects the app.
+  - Loads main.jsx as a module script.
+
+package.json
+  - Lists all libraries/packages the project depends on.
+  - Defines scripts: "npm run dev" (start server), "npm run build"
+
+vite.config.js
+  - Configuration for Vite (the build tool).
+  - Tells Vite to use the React plugin so JSX code works.
+
+.env
+  - Stores the secret MapTiler API key.
+  - Should NEVER be uploaded to GitHub publicly.
+
+vercel.json
+  - Tells Vercel (hosting platform) to redirect all URLs
+    to index.html so React routing works after deployment.
+
+---[ STARTUP FILES ]---
+
+src/main.jsx
+  - The app entry point / boot file.
+  - Wraps everything in <BrowserRouter> so routing works.
+  - Imports MapLibre map CSS.
+  - Mounts the app into <div id="root"> in index.html.
+
+src/App.jsx
+  - The URL route map of the application.
+  - Defines which URL shows which page:
+      /            -> Landing.jsx   (login screen)
+      /dashboard   -> Dashboard.jsx
+      /map         -> KolkataDashboard.jsx (AuraPath)
+      /alerts      -> AlertSettings.jsx
+      /system      -> SystemStatus.jsx (admin only)
+  - All pages except Landing are wrapped in <Layout>.
+
+---[ CONTEXT / GLOBAL STATE ]---
+
+src/context/AppContext.jsx
+  - THE BRAIN OF THE ENTIRE APPLICATION.
+  - Uses React's createContext + useState hooks.
+  - Stores data that ANY component can access from anywhere.
+
+  State it manages:
+    theme           -> "dark" or "light" color scheme
+    user            -> Logged-in user's name
+    authRole        -> "user" or "admin" (controls page access)
+    cityState       -> Selected city name, coordinates,
+                       bounding box, and AQI hex grid data
+    weatherState    -> Live weather data from Open-Meteo API
+    thresholds      -> User-set limits for PM2.5, CO2, Noise
+    activeAlerts    -> List of current pollution alerts
+    historicalAlerts-> List of dismissed/resolved alerts
+
+  Functions it provides:
+    updateCity()    -> Changes the selected city, regenerates
+                       the AQI hexagonal grid
+    toggleTheme()   -> Switches dark/light mode
+    dismissAlert()  -> Moves an alert from active to history
+    (auto-timer)    -> Simulates new alerts every 15 seconds
+
+---[ UTILITIES ]---
+
+src/utils/api.js
+  - The API communication hub.
+  - Contains all functions that call external services.
+
+  Functions:
+    fetchCityAQI(city)
+      -> Calls WAQI API
+      -> Gets Air Quality Index for a city by name
+
+    fetchGeoAQI(lat, lon)
+      -> Calls WAQI API
+      -> Gets AQI by geographic coordinates (lat/lon)
+
+    fetchRoutes(start, end)
+      -> Calls OpenRouteService API
+      -> Gets up to 3 driving routes between two points
+      -> Smart fallback: retries with 1 route if 3 fail
+      -> Handles long distances by splitting into waypoints
+
+    fetchGeocode(query)
+      -> Calls Photon/Komoot API (free geocoding)
+      -> Converts text like "Park Street" to coordinates
+      -> Uses 300ms debounce to reduce API calls
+
+    fetchWeatherData(lat, lon)
+      -> Calls Open-Meteo API (completely free)
+      -> Gets current weather + hourly + 7-day forecast
+      -> Has a full hardcoded fallback if API is down
+
+src/utils/aqiGrid.js
+  - Generates the hexagonal AQI map overlay.
+  - Uses @turf/turf library for GIS calculations.
+
+  Functions:
+    generateCityAQIGrid(bbox, center)
+      -> Creates a grid of hexagons (0.8km each) over a city
+      -> Each hexagon gets a simulated AQI value
+      -> Areas closer to city center = more polluted
+      -> Assigns colors using official AQI color scale:
+           0-50   = Green  (Good)
+           51-100 = Yellow-Green (Moderate)
+           101-150= Yellow (Unhealthy for Sensitive Groups)
+           151-200= Orange (Unhealthy)
+           201-300= Red    (Very Unhealthy)
+           300+   = Purple (Hazardous)
+
+    sampleRouteAQI(routeGeoJSON, grid)
+      -> Takes a route path coordinates
+      -> Checks which hexagons the route passes through
+      -> Calculates the AVERAGE AQI along the route
+      -> This is how AuraPath scores routes as clean/polluted
+
+src/utils/mockData.js
+  - Generates fake but realistic data for Dashboard charts.
+
+  Functions:
+    generateHourlyData()
+      -> Random PM2.5 and CO2 readings for last 12 hours
+      -> Used in Dashboard charts
+
+    generateDailyData()
+      -> Random average and peak AQI for next 5 days
+      -> Used in Dashboard weekly overview chart
+
+    generateIotNodes()
+      -> Simulates 12 IoT sensor nodes (EB-KOL-01 to EB-KOL-12)
+      -> Random online/offline status per node
+      -> Used by SystemStatus admin page
+
+---[ COMPONENTS (Reusable UI Blocks) ]---
+
+src/components/Layout.jsx
+  - The page frame for all authenticated pages.
+  - Arranges: Sidebar (left) + TopNavigation (top) + Content
+  - Uses Framer Motion AnimatePresence for smooth page transitions
+    (content fades in/out when navigating between pages)
+
+src/components/Sidebar.jsx
+  - The left-side navigation menu.
+  - Links: Dashboard, AuraPath (Map), Alerts
+  - If user is admin: also shows "System" link
+  - Highlights the currently active page in green
+  - Shows app version at the bottom (v.2.0.1_beta)
+
+src/components/TopNavigation.jsx
+  - The top header bar shown on every page.
+  - Contains:
+      SearchBar       -> Search any global city to update app
+      Dark/Light toggle -> Animated sun/moon button
+      Bell icon       -> Shows red dot if alerts exist
+                         Opens AlertsPanel when clicked
+      User profile    -> Shows username + dropdown with Logout
+
+src/components/AlertsPanel.jsx
+  - The slide-down notifications panel (opens from bell icon).
+  - Two tabs: "Active Alerts" and "History"
+  - Alerts sorted by severity: Critical > Warning > Advisory
+  - Each alert card shows:
+      Icon, Title, Description, Timestamp, Recommended Action
+  - Critical alerts have a pulsing red animation ring
+  - Dismiss button (checkmark) on each alert
+  - "Dismiss All" button at the bottom
+
+src/components/WeatherIcons.jsx
+  - A helper file (not a full visual component).
+  - Maps WMO weather codes (numbers from Open-Meteo API)
+    to the correct Lucide icon component.
+  - Examples:
+      Code 0   = Clear sky  -> Sun or Moon icon
+      Code 2   = Partly Cloudy -> SunDim icon
+      Code 45  = Fog        -> CloudFog icon
+      Code 61  = Rain       -> CloudRain icon
+      Code 95  = Thunderstorm -> CloudLightning icon
+  - Also provides getWeatherDescription() for text labels.
+
+src/components/AnimatedCounter.jsx
+  - A small reusable component.
+  - Animates a number counting UP from 0 to a target value.
+  - Example: AQI value appears as 0 then counts up to 142.
+  - Uses Framer Motion's useMotionValue for smooth animation.
+  - Wrapped in React.memo to prevent unnecessary re-renders.
+
+src/components/LoadingSpinner.jsx
+  - A simple spinning loading indicator component.
+  - Shown while data is being fetched from APIs.
+
+src/components/AQICard.jsx
+  - A small card that displays an AQI value.
+  - Used as a reusable display widget.
+
+src/components/map/KolkataMap.jsx
+  - The core interactive map component (MapLibre GL).
+  - Features:
+      Dark mode map style (Toner) or Light mode (Streets)
+      Centered on the currently selected city
+      45-degree pitch (slight 3D tilt view)
+      GPS Geolocation button (shows user's blue dot location)
+      Navigation controls (zoom in/out, rotate, compass)
+      Accepts children -> AQIOverlay and route layers sit on top
+  - Reads theme and cityState from AppContext.
+
+src/components/aqi/AQIOverlay.jsx
+  - Draws the colored hexagonal AQI grid ON TOP of the map.
+  - Reads cityState.grid (GeoJSON) from AppContext.
+  - Uses MapLibre's <Source> and <Layer> components.
+  - Hexagons:
+      Fill color = taken from each hexagon's "color" property
+      Opacity = 0.35 normally, 0.8 when hovering (interactive)
+      Outline = faint white border between hexagons
+
+src/components/search/SearchBar.jsx
+  - A smart location search input with autocomplete dropdown.
+  - Uses 300ms debounce (waits before searching) to reduce API calls.
+  - Calls fetchGeocode() from api.js.
+  - Shows a dropdown list of matching places.
+  - Has two display modes: compact (in TopNav) and full (in AuraPath).
+  - Closes dropdown when user clicks outside.
+  - Calls onLocationSelect() callback when a place is picked.
+
+---[ PAGES (Full Screens) ]---
+
+src/pages/Landing.jsx  (URL: /)
+  - The login / welcome screen.
+  - Background: 40 animated floating green particles.
+  - Hero text: "Making Invisible Pollution Visible"
+  - "Get Started" button -> opens a login modal popup.
+  - Login modal lets user:
+      Choose role: Resident (user) or Admin
+      Enter username and password
+  - On submit:
+      Sets authRole and username in AppContext
+      Tries to detect GPS location (browser geolocation API)
+      Reverse geocodes GPS coords to find city name
+      Updates AppContext city to detected location
+      Navigates to /dashboard
+  - Falls back to default Kolkata if GPS is denied or fails.
+
+src/pages/Dashboard.jsx  (URL: /dashboard)
+  - The main data statistics dashboard.
+  - Displays:
+      Current AQI value with animated counter
+      Health category badge (Good/Moderate/Unhealthy etc.)
+      Current weather: temperature, humidity, wind, UV index
+      PM2.5 area chart (hourly, last 12 hours)
+      CO2 bar chart (hourly, last 12 hours)
+      5-day weather forecast cards
+      AQI daily bar chart (weekly overview)
+      AQI color scale legend
+  - Data comes from: AppContext (weather), mockData.js (charts)
+
+src/pages/KolkataDashboard.jsx  (URL: /map)
+  - The AuraPath clean-route planner (most complex page).
+  - Left side: Full-screen interactive map
+      AQI hex overlay shown (AQIOverlay)
+      Routes drawn as colored lines when calculated
+      Hex tooltip shows AQI on hover
+  - Right side panel:
+      Two search bars (Start Point & Destination)
+      Route results with:
+          Distance and estimated time
+          AQI score for each route
+          "Fastest Route" vs "Cleanest Route" badges
+          Route comparison cards
+  - How it works:
+      User types start + end locations -> SearchBar calls
+      fetchGeocode() to get coordinates
+      fetchRoutes() calls OpenRouteService for up to 3 routes
+      sampleRouteAQI() scores each route through hex grid
+      Routes displayed on map with different colors
+      Best clean route highlighted in green
+
+src/pages/AlertSettings.jsx  (URL: /alerts)
+  - The alert threshold configuration page.
+  - Users can adjust:
+      Critical Health Warnings toggle (on/off switch)
+      PM2.5 Threshold slider (50 to 300 µg/m³)
+      CO2 Concentration slider (400 to 2000 ppm)
+      Noise Pollution slider (50 to 120 dB)
+  - Sliders update the "thresholds" in AppContext in real-time.
+  - AppContext uses these thresholds in simulated alert messages.
+  - SMS notifications section (UI demo only, not functional).
+  - "Save Configuration" button (UI demo, thresholds auto-saved).
+
+src/pages/SystemStatus.jsx  (URL: /system — ADMIN ONLY)
+  - The administrator IoT sensor health monitor.
+  - Only visible in Sidebar if user logged in as Admin.
+  - Summary cards at top:
+      Nodes Online count
+      Nodes Offline count
+      Average Uptime percentage
+  - Grid of 12 sensor nodes (EB-KOL-01 to EB-KOL-12):
+      Green pulsing dot = online and reporting
+      Red dot           = offline / connection refused
+      Shows uptime percentage per node
+      Status text: "Sys.Nominal" or "Conn.Refused"
+  - Data generated by generateIotNodes() in mockData.js
+
+================================================================
+              HOW EVERYTHING CONNECTS (DATA FLOW)
+================================================================
+
+STEP 1: User opens the app -> browser loads index.html
+STEP 2: main.jsx boots React, wraps in BrowserRouter
+STEP 3: App.jsx shows Landing.jsx (the login page)
+STEP 4: User logs in -> AppContext sets role, username, city
+STEP 5: GPS detected -> AppContext.updateCity() called
+STEP 6: AppContext generates AQI hex grid via aqiGrid.js
+STEP 7: AppContext fetches weather via api.js -> Open-Meteo
+STEP 8: AppContext starts 15-second alert simulation timer
+STEP 9: App navigates to /dashboard
+STEP 10: Layout.jsx wraps page with Sidebar + TopNavigation
+         - TopNavigation reads alerts -> shows red bell dot
+         - Sidebar reads authRole -> shows/hides System link
+STEP 11: Dashboard reads cityState.weatherState from AppContext
+         - Charts use mockData.js generated values
+STEP 12: User goes to /map (AuraPath)
+         - KolkataMap renders the map
+         - AQIOverlay draws hex grid from AppContext cityState.grid
+         - User searches route -> api.js calls OpenRouteService
+         - aqiGrid.js sampleRouteAQI() scores the routes
+         - Routes drawn on map with AQI score comparison
+
+================================================================
+                    EXTERNAL APIs USED
+================================================================
+
+API                   | Cost   | Purpose
+----------------------|--------|--------------------------------
+WAQI (World AQI)      | Free   | Real AQI data by city/coords
+OpenRouteService      | Free   | Driving route navigation
+Photon / Komoot       | Free   | Place name search (geocoding)
+Open-Meteo            | Free   | Weather forecast data
+MapTiler              | Free*  | Map tiles (visual map style)
+
+* MapTiler requires a free API key (stored in .env file)
+
+================================================================
+                END OF ECOBYTE CODE OVERVIEW
+================================================================

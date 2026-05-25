@@ -3,7 +3,7 @@ import Map, { GeolocateControl, NavigationControl } from "react-map-gl/maplibre"
 import { useAppContext } from "../../context/AppContext";
 import "maplibre-gl/dist/maplibre-gl.css";
 
-// MapTiler Vector Styles
+
 const MAPTILER_KEY = import.meta.env.VITE_MAPTILER_KEY;
 const MAP_STYLE_DARK = `https://api.maptiler.com/maps/toner/style.json?key=${MAPTILER_KEY}`;
 const MAP_STYLE_LIGHT = `https://api.maptiler.com/maps/streets/style.json?key=${MAPTILER_KEY}`;
@@ -12,8 +12,7 @@ export default function KolkataMap({ children, onMapLoad, interactiveLayerIds, o
   const { theme, cityState } = useAppContext(); 
   const mapRef = useRef(null);
   const geoControlRef = useRef(null);
-  
-  // Memoize map style to prevent unnecessary re-renders
+
   const mapStyle = useMemo(() => {
     return (theme === "dark" || !theme) ? MAP_STYLE_DARK : MAP_STYLE_LIGHT; 
   }, [theme]);
@@ -22,7 +21,7 @@ export default function KolkataMap({ children, onMapLoad, interactiveLayerIds, o
     if (onMapLoad) {
       onMapLoad(e.target);
     }
-    // Auto-trigger geolocation blue dot for the user without requiring a manual click
+    
     setTimeout(() => {
         geoControlRef.current?.trigger();
     }, 1000);

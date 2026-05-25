@@ -1,0 +1,414 @@
+================================================================================
+  ECOBYTE — SIMPLIFIED PRESENTATION SPEECH
+  Team: GitPush Force
+  Members: Supriyo Bhattacharyya, Trisha Bej, Cherry Ghosh,
+           Hritesh Saha, Harshh Gupta, [Member 6]
+  Mentor: Prof. Varsha Poddar
+================================================================================
+
+  💡 HOW TO USE THIS SCRIPT
+  — Speak slowly and clearly. Don't rush.
+  — [PAUSE] = breathe, let the point sink in.
+  — Bold lines are your KEY statements — say them with confidence.
+  — ⚠️ sections = common cross questions already preemptively answered in the speech.
+  — Time: ~8–10 minutes
+
+================================================================================
+🎤 SLIDE 1 — INTRODUCTION
+================================================================================
+
+"Good evening everyone.
+
+I'm Supriyo Bhattacharyya, presenting on behalf of Team GitPush Force.
+
+Our team of six —
+Trisha, Cherry, Hritesh, Harshh, and [Member 6] —
+built this project together, from scratch.
+
+We'd also like to thank our mentor, Professor Varsha Poddar,
+for guiding us throughout.
+
+[PAUSE]
+
+Today, I'll be presenting — EcoByte.
+
+Let me start with a simple question:
+
+👉 Have you ever thought about whether the road you're taking to work
+   is slowly damaging your lungs?
+
+Probably not. Because no app tells you that.
+
+That's the gap EcoByte fills."
+
+
+================================================================================
+🌍 SLIDE 2 — THE PROBLEM
+================================================================================
+
+"Let's talk about why this matters.
+
+Every year, over 7 million people die from air pollution.
+90% of the world breathes polluted air daily.
+
+[PAUSE]
+
+But here's the thing —
+Google Maps, Apple Maps, every navigation app you use —
+they only show you the fastest route.
+
+They don't show you which roads have dangerous air quality.
+They don't warn you before you walk into a pollution hotspot.
+
+And the worst part?
+Air pollution is hyperlocal.
+
+One busy intersection can have hazardous air quality,
+while a street two blocks away is completely clean.
+
+But your weather app just gives you one number for the whole city.
+That one number hides the street-level reality.
+
+That is the problem EcoByte solves."
+
+
+================================================================================
+💡 SLIDE 3 — WHAT IS ECOBYTE?
+================================================================================
+
+"EcoByte is a smart environmental intelligence platform
+with four features:
+
+  1. A real-time environmental Dashboard
+  2. AuraPath — our health-first routing engine
+  3. Alert Settings — personalized pollution notifications
+  4. A System Status portal for administrators
+
+Let me walk you through each one simply."
+
+
+================================================================================
+🧠 SLIDE 4 — THE DASHBOARD
+================================================================================
+
+"When you log in and allow location access,
+EcoByte detects your city automatically.
+
+The dashboard then shows you — live:
+
+  → Current AQI with a color-coded scale
+    (Green = Good, Yellow = Moderate, Red = Hazardous)
+
+  → An animated dial that moves to show your exact pollution level
+
+  → Live temperature, UV Index, Humidity, Wind Speed,
+    Atmospheric Pressure, and Visibility
+
+  → A 24-hour hour-by-hour weather forecast
+
+  → A 5-day weather outlook
+
+  → Sunrise and Sunset times
+
+  → And our Lifestyle Intel Engine —
+    which reads all these conditions and gives you
+    practical recommendations like:
+    'Low Pollen Count today', 'Apply Sunscreen', or 'Indoor Workout Advisable'
+
+[PAUSE]
+
+This isn't just data on a screen.
+It translates environmental readings into everyday, actionable advice.
+
+  ⚠️ [If asked: 'Where does the data come from?']
+  We use Open-Meteo for all weather data, and WAQI — the World Air Quality Index API —
+  for live AQI readings. These are real, publicly available, reliable data sources."
+
+
+================================================================================
+🌿 SLIDE 5 — AURAPATH (MOST IMPORTANT)
+================================================================================
+
+"Now, our most important feature — AuraPath.
+
+AuraPath is a health-first routing engine.
+Where Google Maps optimizes for speed, AuraPath optimizes for your health.
+
+[PAUSE]
+
+Here's exactly how it works — step by step:
+
+  Step 1: You type in a starting point and a destination
+          in our live search bar.
+          The search bar uses real geocoding —
+          it looks up actual map coordinates for whatever location you type.
+
+  Step 2: We call the OpenRouteService API —
+          a real, open-source routing service —
+          and it gives us multiple possible routes between your two points.
+
+  Step 3: For each route, we use a library called Turf.js
+          to sample dozens of GPS points along that route's path.
+
+  Step 4: At each sampled point, we check our AQI hexagonal grid —
+          which is a pollution map overlaid on the city,
+          divided into small hexagonal zones —
+          and we read the air quality value for that exact location.
+
+  Step 5: We average all those AQI readings across the full route
+          and compute a Health Score for each route out of 100.
+
+  Step 6: We present you with two options:
+          👉 Cleanest Route — highlighted in green on the map
+          👉 Fastest Route — shown as a grey dashed line
+
+  You can see the estimated travel time, distance,
+  the health score, and the average AQI exposure for each route.
+
+  Then with one tap — you can open it directly in Google Maps
+  for real turn-by-turn navigation.
+
+[PAUSE]
+
+  ⚠️ [If asked: 'Is this real or simulated?']
+  The routing is real. We call a live API (OpenRouteService), perform real
+  geospatial computation using Turf.js, and query a real AQI hexagonal grid
+  that we built for Kolkata. The algorithm is genuine and functional.
+
+  ⚠️ [If asked: 'Why only Kolkata?']
+  AuraPath in its current version is optimized for Kolkata —
+  that is our prototype city. The full technical architecture is built and working.
+  Expanding to other cities is Phase 1 of our roadmap.
+  The map clearly shows a 'Beta: Optimized for Kolkata' notice so users know.
+
+  ⚠️ [If asked: 'What is a hexagonal grid?']
+  Instead of dividing the city into squares, we divide it into hexagons.
+  Hexagons are a better shape for geographic data because the distance from
+  the center to every edge is equal — so pollution readings are more
+  geometrically accurate and fair across all directions."
+
+
+================================================================================
+🔔 SLIDE 6 — ALERT SETTINGS
+================================================================================
+
+"EcoByte also lets users set their own air quality thresholds
+for personal alerts.
+
+On the Alert Settings page, you can configure:
+
+  → PM2.5 Limit    — fine particulate matter (the most dangerous pollutant)
+  → CO2 Level      — indoor carbon dioxide threshold
+  → Noise Pollution — decibel limit for route avoidance
+
+We also have Critical Health Warnings —
+these are emergency notifications triggered automatically
+when a severe pollution spike is detected near you.
+
+
+[PAUSE]
+
+  ⚠️ [If asked: 'Do these thresholds connect to the routing?']
+  Yes. If PM2.5 on a route exceeds your set threshold,
+  AuraPath will automatically deprioritize that route.
+  The alert settings are not just notifications —
+  they actually influence routing decisions."
+
+
+================================================================================
+⚙️ SLIDE 7 — TECH STACK
+================================================================================
+
+"Let me quickly cover how we built this.
+
+Frontend:
+  → React 19 with Vite for fast rendering
+  → Tailwind CSS for the design system
+  → Framer Motion for smooth animations
+
+Maps and Geospatial:
+  → MapLibre GL JS for the interactive live map
+  → Turf.js for all our geospatial calculations
+  → OpenRouteService for multi-route navigation
+
+Data APIs:
+  → Open-Meteo  — weather data (temperature, UV, wind, humidity, pressure, visibility)
+  → WAQI        — World Air Quality Index, for live AQI readings
+  → MapTiler    — map tile hosting
+  
+
+Routing and Auth:
+  → React Router v7 for page navigation
+  → Role-based login: Resident mode and Admin mode
+
+Deployment:
+  → Deployed live on Vercel
+
+[PAUSE]
+
+  ⚠️ [If asked: 'Why not use Google Maps API?']
+  Google Maps API is paid and has strict usage limits.
+  OpenRouteService and MapLibre are open-source and free,
+  giving us the same capability with full control and no cost restrictions."
+
+
+================================================================================
+⚙️ SLIDE 8 — ADMIN PORTAL
+================================================================================
+
+"EcoByte has two types of users: residents and administrators.
+
+When an admin logs in, they see the System Status portal.
+
+This shows:
+  → Total sensor nodes online vs offline
+  → Average system uptime percentage
+  → A full grid of individual sensor nodes —
+    each showing its ID, online/offline status with a live pulsing indicator,
+    uptime %, and a diagnostic code.
+
+Admins can also trigger a 'Run Diagnostics' command
+to check the health of every node.
+
+[PAUSE]
+
+  ⚠️ [If asked: 'Are these real sensors?']
+  The current sensor data is simulated with realistic mock data.
+  But the admin portal was specifically designed to support a
+  real IoT sensor network — which is Phase 3 of our roadmap.
+  The infrastructure is already built for it."
+
+
+================================================================================
+🚀 SLIDE 9 — FUTURE ROADMAP
+================================================================================
+
+"We see EcoByte growing in three phases:
+
+PHASE 1 — City-Wide Expansion
+  → Extend AuraPath to Delhi, Mumbai, Bangalore, Hyderabad
+  → Real-time AQI grid updates every 15 minutes
+  → Full city polygon coverage, not just selected zones
+
+PHASE 2 — Mobile and Wearables
+  → Native iOS and Android apps
+  → Smartwatch integration — vibration alerts for asthma and COPD patients
+    before they enter a hazardous zone
+  → Personalized health profiles with custom routing thresholds
+
+PHASE 3 — Crowdsourced IoT Sensor Network
+  → Instead of relying only on third-party APIs,
+    we deploy our own low-cost, solar-powered sensors
+    at bus stops, schools, parks, and street corners.
+  → Citizens can register personal sensors too —
+    contributing to a city-wide, community-powered pollution map.
+  → This turns EcoByte from a data consumer into a data producer.
+  → The admin portal you just saw was designed for exactly this —
+    it already handles node tracking and remote diagnostics.
+
+[PAUSE]
+
+Our vision:
+EcoByte becomes the environmental intelligence layer that every smart city uses.
+An open layer that navigation apps, health apps, and governments can plug into."
+
+
+================================================================================
+🔚 SLIDE 10 — CLOSING
+================================================================================
+
+"To summarize:
+
+EcoByte solves a real problem — invisible, hyperlocal air pollution —
+with real, working technology.
+
+It's not a prototype concept. The app is built, live, and deployed.
+
+  → The dashboard shows live environmental data
+  → AuraPath compares routes by health score, not just speed
+  → The alert system personalizes pollution thresholds per user
+  → The admin portal is ready for a real IoT network
+
+[PAUSE]
+
+Because in a world where 7 million people die from polluted air every year —
+the least our technology can do
+is help us choose a healthier path.
+
+[PAUSE]
+
+Thank you.
+
+On behalf of Supriyo, Trisha, Cherry, Hritesh, Harshh, and [Member 6] —
+and with heartfelt thanks to our mentor Prof. Varsha Poddar —
+
+We're happy to answer any questions."
+
+
+================================================================================
+✅ QUICK Q&A CHEAT SHEET — READ THIS BEFORE PRESENTING
+================================================================================
+
+Q: Is the data real?
+A: Yes. Weather from Open-Meteo, AQI from WAQI — both live APIs.
+
+Q: Is routing real?
+A: Yes. OpenRouteService is a real routing API. Turf.js is a real geospatial library.
+   The AQI grid is a real GeoJSON file we built for Kolkata.
+
+Q: Why only Kolkata?
+A: Kolkata is our prototype city. AuraPath's architecture is complete — expanding
+   to more cities is Phase 1 of the roadmap.
+
+Q: Are IoT sensors real?
+A: No. System Status uses mock data. Real sensor hardware is Phase 3 (future scope).
+
+Q: What is a hexagonal grid?
+A: The city's map is divided into hexagonal zones. Each hexagon stores an AQI value.
+   Hexagons are more geometrically accurate than squares for spatial data.
+
+Q: Why hexagons and not squares?
+A: Because the distance from a hexagon center to any edge is equal — unlike squares
+   where diagonal neighbors are farther than adjacent ones. Better for pollution spread.
+
+Q: What is Turf.js?
+A: An open-source JavaScript library for geospatial math — sampling points along a
+   route, doing polygon intersections, calculating distances on a map.
+
+Q: What is OpenRouteService?
+A: A free, open-source routing API — similar to Google Maps Directions API,
+   but without cost restrictions or usage caps.
+
+Q: Is the app deployed?
+A: Yes. Live on Vercel, which is a cloud deployment platform optimal for React apps.
+
+Q: What is the role-based login?
+A: Two roles: Resident (regular user with dashboard + routing + alerts) and
+   Admin (same as Resident + System Status portal).
+
+Q: What are PM2.5, CO2, noise in alerts?
+A: PM2.5 = fine particles smaller than 2.5 micrometres — the most harmful to lungs.
+   CO2 = carbon dioxide — high levels cause drowsiness and respiratory issues.
+   Noise = decibel level — excessive noise is also a WHO-recognized health pollutant.
+
+Q: Does the app work offline?
+A: No. EcoByte requires an internet connection to fetch live API data.
+
+Q: What about ML / predictions?
+A: Not in the current version. Our roadmap includes predictive AQI modeling —
+   but we are honest that ML is not yet implemented.
+
+================================================================================
+❌ THINGS NOT IN THE CURRENT BUILD — DO NOT CLAIM THESE
+================================================================================
+
+  — Machine learning or AI-based AQI prediction       (future scope)
+  — Historical pollution trend charts                  (future scope)
+  — Real physical IoT hardware sensors                 (simulated currently)
+  — Native mobile app                                  (future scope)
+  — Smartwatch integration                             (future scope)
+  — Full city-wide AuraPath (beyond Kolkata)           (future scope)
+
+================================================================================
+END OF SPEECH
+================================================================================

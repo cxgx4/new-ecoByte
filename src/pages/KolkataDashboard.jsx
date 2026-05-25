@@ -1,4 +1,5 @@
 import React, { useState, useCallback } from "react";
+import { useLocation, useNavigate } from "react-router-dom";
 import { Source, Layer, Popup } from "react-map-gl/maplibre";
 import KolkataMap from "../components/map/KolkataMap";
 import SearchBar from "../components/search/SearchBar";
@@ -22,6 +23,9 @@ export default function KolkataDashboard() {
   const [isRouting, setIsRouting] = useState(false);
   const [activeRouteType, setActiveRouteType] = useState(null);
   const [availableRoutes, setAvailableRoutes] = useState(null);
+  
+  const location = useLocation();
+  const navigate = useNavigate();
 
   const onMapLoad = useCallback((map) => {
     setMapInstance(map);
@@ -263,6 +267,8 @@ export default function KolkataDashboard() {
           Urban Air Quality Grid
         </p>
       </motion.div>
+
+
 
       {/* Global Search Bar Container */}
       <div className="absolute top-6 left-1/2 transform -translate-x-1/2 z-50 w-full max-w-md px-4 pointer-events-auto">

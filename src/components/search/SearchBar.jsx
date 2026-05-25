@@ -65,9 +65,9 @@ export default function SearchBar({ onLocationSelect, compact, icon, placeholder
 
   return (
     <div ref={containerRef} className={containerClass}>
-      <div className={`relative flex items-center bg-white/80 dark:bg-slate-900/80 backdrop-blur-md border border-gray-200 dark:border-white/10 overflow-hidden transition-all focus-within:ring-2 focus-within:ring-neon-green/50 ${compact ? 'rounded-xl' : 'rounded-2xl'}`}>
-        {!compact && <Search className="absolute left-4 w-5 h-5 text-gray-400" />}
-        {compact && (icon || <Search className="absolute left-3 w-4 h-4 text-gray-400" />)}
+      <div className="relative flex items-center w-full">
+        {!compact && <Search className="absolute left-4 w-5 h-5 text-[var(--text-muted)] pointer-events-none" />}
+        {compact && (icon || <Search className="absolute left-3 w-4 h-4 text-[var(--text-muted)] pointer-events-none" />)}
         
         <input
           type="text"
@@ -75,10 +75,10 @@ export default function SearchBar({ onLocationSelect, compact, icon, placeholder
           onChange={(e) => handleSearch(e.target.value)}
           onFocus={() => { if (query) setIsOpen(true); }}
           placeholder={displayPlaceholder}
-          className={inputClass}
+          className="search-bar w-full"
         />
         {isSearching && (
-          <Loader2 className={`absolute animate-spin text-neon-green ${compact ? 'right-2 w-4 h-4' : 'right-4 w-5 h-5'}`} />
+          <Loader2 className={`absolute animate-spin text-[var(--accent-green)] ${compact ? 'right-4 w-4 h-4' : 'right-4 w-5 h-5'}`} />
         )}
       </div>
 
